@@ -21,54 +21,57 @@ model = joblib.load('model_rf_ahs.pkl')
 
 st.title("Prediksi Panjang Kabel Penerangan - AHS")
 
-# Membuat dua kolom
-col1, col2 = st.columns(2)
+# Membuat layout responsif
+# Menggunakan container agar otomatis menyesuaikan
+with st.container():
+    # Membuat dua kolom yang fleksibel
+    col1, col2 = st.columns([1, 1])  # Proporsi kolom sama, bisa diubah sesuai kebutuhan
 
-# Input pengguna di kolom kiri
-with col1:
-    st.header("Input Data")
-    rooms = st.number_input("Jumlah Ruangan", min_value=1, max_value=10, value=1)
-    surfaces = st.number_input("Jumlah Permukaan m2", min_value=1, max_value=200, value=15)
-    height = st.number_input("Tinggi Bangunan (mtr)", min_value=1, max_value=200, value=3)
-    spotlight = st.number_input("Jumlah Spotlight", min_value=0, max_value=50, value=2)
-    downlight = st.number_input("Jumlah Downlight", min_value=0, max_value=50, value=3)
-    pendant = st.number_input("Jumlah Pendant", min_value=0, max_value=50, value=0)
+    # Input di kolom kiri
+    with col1:
+        st.header("Input Data")
+        rooms = st.number_input("Jumlah Ruangan", min_value=1, max_value=10, value=1)
+        surfaces = st.number_input("Jumlah Permukaan m2", min_value=1, max_value=200, value=15)
+        height = st.number_input("Tinggi Bangunan (m)", min_value=1, max_value=200, value=3)
+        spotlight = st.number_input("Jumlah Spotlight", min_value=0, max_value=50, value=2)
+        downlight = st.number_input("Jumlah Downlight", min_value=0, max_value=50, value=3)
+        pendant = st.number_input("Jumlah Pendant", min_value=0, max_value=50, value=0)
 
-    # Hitung total lampu otomatis
-    totLamps = spotlight + downlight + pendant
-    st.write("Total Lampu (otomatis dihitung):", totLamps)
+        # Hitung total lampu otomatis
+        totLamps = spotlight + downlight + pendant
+        st.write("Total Lampu (otomatis dihitung):", totLamps)
 
-    # Tombol prediksi
-    if st.button("Prediksi Kabel Length"):
-        # Buat DataFrame input
-        input_data = pd.DataFrame({
-            'rooms': [rooms],
-            'surfaces': [surfaces],
-            'height': [height],
-            'spotlight': [spotlight],
-            'downlight': [downlight],
-            'pendant': [pendant],
-            'totLamps': [totLamps]
-        })
+        # Tampilkan tombol prediksi
+        if st.button("Prediksi Kabel Length"):
+            # Buat DataFrame input
+            input_data = pd.DataFrame({
+                'rooms': [rooms],
+                'surfaces': [surfaces],
+                'height': [height],
+                'spotlight': [spotlight],
+                'downlight': [downlight],
+                'pendant': [pendant],
+                'totLamps': [totLamps]
+            })
 
-        # Prediksi
-        pred = model.predict(input_data)[0]
+            # Prediksi
+            pred = model.predict(input_data)[0]
 
-        # Rincian hasil di kolom kanan
-        with col2:
-            st.header("Hasil Prediksi")
-            st.success(f"Perkiraan Kabel Length yang Dibutuhkan: {pred:.2f} meter")
-            cable_point = np.ceil(pred / totLamps)
-            st.write(f"- NYM 2 x 2,5 : {cable_point:.2f} m")
-            pipa_conduit = cable_point - 1
-            st.write(f"- Pipa conduit 20 mm : {pipa_conduit:.2f} m")
-            sock_pcs = np.ceil(pipa_conduit / 2)
-            st.write(f"- Sock conduit 20 mm : {int(sock_pcs)} pcs")
-            klem_pcs = np.ceil(pipa_conduit)
-            st.write(f"- Klem conduit 20 mm : {int(klem_pcs)} pcs")
-            teedos_pcs = 1
-            st.write(f"- Teedos 20 mm : {teedos_pcs} pcs")
-            flexible = 1
-            st.write(f"- Flexible 20 mm : {flexible} m")
-            sekrup_fisher = (klem_pcs + teedos_pcs) * 2
-            st.write(f"- Sekrup dan Fisher : {int(sekrup_fisher)} pcs")
+            # Tampilkan hasil di kolom kanan
+            with col2:
+                st.header("Hasil Prediksi")
+                st.success(f"Perkiraan Kabel Length yang Dibutuhkan: {pred:.2f} meter")
+                cable_point = np.ceil(pred / totLamps)
+                st.write(f"- NYM 2 x 2,5 : {cable_point:.2f} m")
+                pipa_conduit = cable_point - 1
+                st.write(f"- Pipa conduit 20 mm : {pipa_conduit:.2f} m")
+                sock_pcs = np.ceil(pipa_conduit / 2)
+                st.write(f"- Sock conduit 20 mm : {int(sock_pcs)} pcs")
+                klem_pcs = np.ceil(pipa_conduit)
+                st.write(f"- Klem conduit 20 mm : {int(klem_pcs)} pcs")
+                teedos_pcs = 1
+                st.write(f"- Teedos 20 mm : {teedos_pcs} pcs")
+                flexible = 1
+                st.write(f"- Flexible 20 mm : {flexible} m")
+                sekrup_fisher = (klem_pcs + teedos_pcs) * 2
+                st.write(f"- Sekrup dan Fisher : {int(sekrup_fisher)} pcs")

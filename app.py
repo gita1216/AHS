@@ -21,7 +21,7 @@ model = joblib.load('model_rf_ahs.pkl')
 
 st.title("Prediksi Panjang Kabel Penerangan - AHS")
 
-# Input harga sendiri
+# Input harga material
 st.sidebar.header("Setting Harga Material")
 harga_nym_per_m = st.sidebar.number_input("Harga NYM 2 x 2,5 per meter", min_value=0, value=20000)
 harga_pipa_per_m = st.sidebar.number_input("Harga Pipa Conduit 20mm per meter", min_value=0, value=4200)
@@ -62,23 +62,23 @@ with st.container():
 
             pred = model.predict(input_data)[0]
 
-            # Hitung komponen harga
+            # Hitung jumlah titik kabel (jumlah titik lampu)
+            cable_point = np.ceil(pred / totLamps)
+
+            # Hitung komponen harga berdasarkan jumlah titik lampu
             total_harga_nym = cable_point * harga_nym_per_m
+            pipa_conduit = cable_point - 1
             total_harga_pipa = pipa_conduit * totLamps * harga_pipa_per_m
+            sock_pcs = np.ceil(pipa_conduit / 2)
             total_harga_sock = sock_pcs * totLamps * harga_sock_per_pcs
+            klem_pcs = np.ceil(pipa_conduit)
             total_harga_klem = klem_pcs * totLamps * harga_klem_per_pcs
             total_harga_teedos = totLamps * harga_teedos_per_pcs
             total_harga_flexible = totLamps * harga_flexible_per_m
-            total_harga_sekrup = (np.ceil(pred / totLamps) + totLamps) * harga_sekrup_fisher_per_pcs
+            sekrup_fisher = (klem_pcs + 1) * 2
+            total_harga_sekrup = sekrup_fisher * harga_sekrup_fisher_per_pcs
 
-            #total_harga_nym = pred * harga_nym_per_m
-           # total_harga_pipa = np.ceil (pred- 1) * harga_pipa_per_m
-           # total_harga_sock = np.ceil((pred - 1) / 2) * harga_sock_per_pcs
-          #  total_harga_klem = np.ceil(pred - 1) * harga_klem_per_pcs
-          # total_harga_teedos = totLamps * harga_teedos_per_pcs
-          #  total_harga_flexible = totLamps * harga_flexible_per_m
-           # total_harga_sekrup = (np.ceil(pred - 1) + totLamps) * harga_sekrup_fisher_per_pcs
-
+            # Hitung total harga
             total_harga = (
                 total_harga_nym +
                 total_harga_pipa +
@@ -89,6 +89,7 @@ with st.container():
                 total_harga_sekrup
             )
 
+            # Tampilkan hasil prediksi
             with col2:
                 st.header("Hasil Prediksi")
                 st.success(f"Perkiraan Kabel Length yang Dibutuhkan: {pred:.2f} meter")

@@ -66,7 +66,7 @@ with st.container():
             cable_point = np.ceil(pred / totLamps)
 
             # Hitung komponen harga berdasarkan jumlah titik lampu
-            total_harga_nym = cable_point * harga_nym_per_m * totlamps
+            total_harga_nym = pred * harga_nym_per_m
             pipa_conduit = cable_point - 1
             total_harga_pipa = pipa_conduit * totLamps * harga_pipa_per_m
             sock_pcs = np.ceil(pipa_conduit / 2)

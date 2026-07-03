@@ -8,7 +8,7 @@ Original file is located at
 
 # 🔌 Estimasi Panjang Kabel Instalasi Listrik dengan Random Forest Regressor
 **Tujuan:** Memprediksi nilai `cableLength` dari data spesifikasi instalasi rumah tinggal  
-**Output:** Model prediksi + tabel kontribusi fitur (AHS) + metrik evaluasi
+**Output:** Model prediksi
 """
 
 import streamlit as st
@@ -21,13 +21,19 @@ model = joblib.load('model_rf_ahs.pkl')
 
 st.title("Prediksi Panjang Kabel Penerangan - AHS")
 
-# Membuat layout responsif
-# Menggunakan container agar otomatis menyesuaikan
-with st.container():
-    # Membuat dua kolom yang fleksibel
-    col1, col2 = st.columns([1, 1])  # Proporsi kolom sama, bisa diubah sesuai kebutuhan
+# Input harga sendiri
+st.sidebar.header("Setting Harga Material")
+harga_nym_per_m = st.sidebar.number_input("Harga NYM 2 x 2,5 per meter", min_value=0, value=50)
+harga_sock_per_pcs = st.sidebar.number_input("Harga Sock conduit 20 mm per pcs", min_value=0, value=10)
+harga_klem_per_pcs = st.sidebar.number_input("Harga Klem conduit 20 mm per pcs", min_value=0, value=15)
+harga_teedos_per_pcs = st.sidebar.number_input("Harga Teedos 20 mm per pcs", min_value=0, value=20)
+harga_flexible_per_m = st.sidebar.number_input("Harga Flexible 20 mm per meter", min_value=0, value=30)
+harga_sekrup_fisher_per_pcs = st.sidebar.number_input("Harga Sekrup dan Fisher per pcs", min_value=0, value=5)
 
-    # Input di kolom kiri
+# Membuat layout responsif
+with st.container():
+    col1, col2 = st.columns([1, 1])
+
     with col1:
         st.header("Input Data")
         rooms = st.number_input("Jumlah Ruangan", min_value=1, max_value=10, value=1)
@@ -41,9 +47,8 @@ with st.container():
         totLamps = spotlight + downlight + pendant
         st.write("Total Lampu (otomatis dihitung):", totLamps)
 
-        # Tampilkan tombol prediksi
+        # Tombol prediksi
         if st.button("Prediksi Kabel Length"):
-            # Buat DataFrame input
             input_data = pd.DataFrame({
                 'rooms': [rooms],
                 'surfaces': [surfaces],
@@ -54,13 +59,40 @@ with st.container():
                 'totLamps': [totLamps]
             })
 
-            # Prediksi
             pred = model.predict(input_data)[0]
 
-            # Tampilkan hasil di kolom kanan
+            # Hitung komponen harga
+            total_harga_nym = pred * harga_nym_per_m
+            total_harga_sock = np.ceil((np.ceil(pred / totLamps) - 1) / 2) * harga_sock_per_pcs
+            total_harga_klem = np.ceil(np.ceil(pred / totLamps) - 1) * harga_klem_per_pcs
+            total_harga_teedos = 1 * harga_teedos_per_pcs
+            total_harga_flexible = 1 * harga_flexible_per_m
+            total_harga_sekrup = (np.ceil(np.ceil(pred / totLamps) - 1) + 1) * harga_sekrup_fisher_per_pcs
+
+            total_harga = (
+                total_harga_nym +
+                total_harga_sock +
+                total_harga_klem +
+                total_harga_teedos +
+                total_harga_flexible +
+                total_harga_sekrup
+            )
+
             with col2:
                 st.header("Hasil Prediksi")
                 st.success(f"Perkiraan Kabel Length yang Dibutuhkan: {pred:.2f} meter")
+                st.write(f"**Total Harga Material:**")
+                # Area latar belakang merah muda
+                st.markdown(
+                    f"""
+                    <div style="background-color:#ffccf9;padding:10px;border-radius:10px;">
+                        Rp {total_harga:,.0f}
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+                # Rincian material
                 cable_point = np.ceil(pred / totLamps)
                 st.write(f"- NYM 2 x 2,5 : {cable_point:.2f} m")
                 pipa_conduit = cable_point - 1

@@ -75,7 +75,7 @@ with st.container():
             total_harga_klem = klem_pcs * totLamps * harga_klem_per_pcs
             total_harga_teedos = totLamps * harga_teedos_per_pcs
             total_harga_flexible = totLamps * harga_flexible_per_m
-            sekrup_fisher = (klem_pcs + 1) * 2 * totlamps
+            sekrup_fisher = (klem_pcs + 1) * 2 * totLamps
             total_harga_sekrup = sekrup_fisher * harga_sekrup_fisher_per_pcs
 
             # Hitung total harga

@@ -23,12 +23,13 @@ st.title("Prediksi Panjang Kabel Penerangan - AHS")
 
 # Input harga sendiri
 st.sidebar.header("Setting Harga Material")
-harga_nym_per_m = st.sidebar.number_input("Harga NYM 2 x 2,5 per meter", min_value=0, value=50)
-harga_sock_per_pcs = st.sidebar.number_input("Harga Sock conduit 20 mm per pcs", min_value=0, value=10)
-harga_klem_per_pcs = st.sidebar.number_input("Harga Klem conduit 20 mm per pcs", min_value=0, value=15)
-harga_teedos_per_pcs = st.sidebar.number_input("Harga Teedos 20 mm per pcs", min_value=0, value=20)
-harga_flexible_per_m = st.sidebar.number_input("Harga Flexible 20 mm per meter", min_value=0, value=30)
-harga_sekrup_fisher_per_pcs = st.sidebar.number_input("Harga Sekrup dan Fisher per pcs", min_value=0, value=5)
+harga_nym_per_m = st.sidebar.number_input("Harga NYM 2 x 2,5 per meter", min_value=0, value=20000)
+harga_pipa_per_m = st.sidebar.number_input("Harga Pipa Conduit 20mm per meter", min_value=0, value=4200)
+harga_sock_per_pcs = st.sidebar.number_input("Harga Sock conduit 20mm per pcs", min_value=0, value=1100)
+harga_klem_per_pcs = st.sidebar.number_input("Harga Klem conduit 20mm per pcs", min_value=0, value=1100)
+harga_teedos_per_pcs = st.sidebar.number_input("Harga Teedos 20mm per pcs", min_value=0, value=9000)
+harga_flexible_per_m = st.sidebar.number_input("Harga Flexible 20mm per meter", min_value=0, value=6500)
+harga_sekrup_fisher_per_pcs = st.sidebar.number_input("Harga Sekrup dan Fisher per pcs", min_value=0, value=500)
 
 # Membuat layout responsif
 with st.container():
@@ -37,11 +38,11 @@ with st.container():
     with col1:
         st.header("Input Data")
         rooms = st.number_input("Jumlah Ruangan", min_value=1, max_value=10, value=1)
-        surfaces = st.number_input("Jumlah Permukaan m2", min_value=1, max_value=200, value=15)
-        height = st.number_input("Tinggi Bangunan (m)", min_value=1, max_value=200, value=3)
-        spotlight = st.number_input("Jumlah Spotlight", min_value=0, max_value=50, value=2)
-        downlight = st.number_input("Jumlah Downlight", min_value=0, max_value=50, value=3)
-        pendant = st.number_input("Jumlah Pendant", min_value=0, max_value=50, value=0)
+        surfaces = st.number_input("Jumlah Permukaan m2", min_value=1, max_value=500, value=15)
+        height = st.number_input("Tinggi Bangunan (m)", min_value=1, max_value=100, value=3)
+        spotlight = st.number_input("Jumlah Spotlight", min_value=0, max_value=100, value=2)
+        downlight = st.number_input("Jumlah Downlight", min_value=0, max_value=100, value=3)
+        pendant = st.number_input("Jumlah Pendant", min_value=0, max_value=100, value=0)
 
         # Hitung total lampu otomatis
         totLamps = spotlight + downlight + pendant
@@ -63,6 +64,7 @@ with st.container():
 
             # Hitung komponen harga
             total_harga_nym = pred * harga_nym_per_m
+            total_harga_pipa = np.ceil(np.ceil(pred / totLamps) - 1) * harga_pipa_per_pcs
             total_harga_sock = np.ceil((np.ceil(pred / totLamps) - 1) / 2) * harga_sock_per_pcs
             total_harga_klem = np.ceil(np.ceil(pred / totLamps) - 1) * harga_klem_per_pcs
             total_harga_teedos = 1 * harga_teedos_per_pcs
@@ -71,6 +73,7 @@ with st.container():
 
             total_harga = (
                 total_harga_nym +
+                total_harga_pipa +
                 total_harga_sock +
                 total_harga_klem +
                 total_harga_teedos +
@@ -93,6 +96,7 @@ with st.container():
                 )
 
                 # Rincian material
+                st.write(f"**Rincian Kebutuhan per titik:**")
                 cable_point = np.ceil(pred / totLamps)
                 st.write(f"- NYM 2 x 2,5 : {cable_point:.2f} m")
                 pipa_conduit = cable_point - 1

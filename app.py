@@ -50,6 +50,7 @@ with st.container():
 
         # Tombol prediksi
         if st.button("Prediksi Kabel Length"):
+            # Data input untuk model
             input_data = pd.DataFrame({
                 'rooms': [rooms],
                 'surfaces': [surfaces],
@@ -60,13 +61,14 @@ with st.container():
                 'totLamps': [totLamps]
             })
 
+            # Prediksi panjang kabel
             pred = model.predict(input_data)[0]
 
-            # Hitung jumlah titik kabel (jumlah titik lampu)
+            # Hitung jumlah titik kabel
             cable_point = np.ceil(pred / totLamps)
 
             # Hitung komponen harga berdasarkan jumlah titik lampu
-            total_harga_nym = pred * harga_nym_per_m
+            total_harga_nym = cable_point * harga_nym_per_m * totLamps
             pipa_conduit = cable_point - 1
             total_harga_pipa = pipa_conduit * totLamps * harga_pipa_per_m
             sock_pcs = np.ceil(pipa_conduit / 2)
@@ -75,10 +77,10 @@ with st.container():
             total_harga_klem = klem_pcs * totLamps * harga_klem_per_pcs
             total_harga_teedos = totLamps * harga_teedos_per_pcs
             total_harga_flexible = totLamps * harga_flexible_per_m
-            sekrup_fisher = (klem_pcs + 1) * 2 * totLamps
+            sekrup_fisher = (klem_pcs + 1) * 2
             total_harga_sekrup = sekrup_fisher * harga_sekrup_fisher_per_pcs
 
-            # Hitung total harga
+            # Hitung total harga keseluruhan
             total_harga = (
                 total_harga_nym +
                 total_harga_pipa +
@@ -93,18 +95,7 @@ with st.container():
             with col2:
                 st.header("Hasil Prediksi")
                 st.success(f"Perkiraan Kabel Length yang Dibutuhkan: {pred:.2f} meter")
-                st.write(f"**Total Harga Material:**")
-                # Area latar belakang merah muda
-                st.markdown(
-                    f"""
-                    <div style="background-color:#ffccf9;padding:10px;border-radius:10px;">
-                        Rp {total_harga:,.0f}
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
-
-                # Rincian material
+                # Tampilkan rincian material
                 st.write(f"**Rincian Kebutuhan per titik:**")
                 cable_point = np.ceil(pred / totLamps)
                 st.write(f"- NYM 2 x 2,5 : {cable_point:.2f} m")
@@ -120,3 +111,14 @@ with st.container():
                 st.write(f"- Flexible 20 mm : {flexible} m")
                 sekrup_fisher = (klem_pcs + teedos_pcs) * 2
                 st.write(f"- Sekrup dan Fisher : {int(sekrup_fisher)} pcs")
+
+                # Tampilkan total harga di bawah rincian material
+                st.write(f"**Total Harga Material:**")
+                st.markdown(
+                    f"""
+                    <div style="background-color:#ffccf9;padding:10px;border-radius:10px;">
+                        Rp {total_harga:,.0f}
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )

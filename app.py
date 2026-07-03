@@ -63,13 +63,21 @@ with st.container():
             pred = model.predict(input_data)[0]
 
             # Hitung komponen harga
+            #total_harga_nym = pred * harga_nym_per_m
+            #total_harga_pipa = np.ceil(np.ceil(pred / totLamps) - 1) * harga_pipa_per_m
+            #total_harga_sock = np.ceil((np.ceil(pred / totLamps) - 1) / 2) * harga_sock_per_pcs
+            #total_harga_klem = np.ceil(np.ceil(pred / totLamps) - 1) * harga_klem_per_pcs
+            #total_harga_teedos = 1 * harga_teedos_per_pcs
+            #total_harga_flexible = 1 * harga_flexible_per_m
+            #total_harga_sekrup = (np.ceil(np.ceil(pred / totLamps) - 1) + 1) * harga_sekrup_fisher_per_pcs
+
             total_harga_nym = pred * harga_nym_per_m
-            total_harga_pipa = np.ceil(np.ceil(pred / totLamps) - 1) * harga_pipa_per_m
-            total_harga_sock = np.ceil((np.ceil(pred / totLamps) - 1) / 2) * harga_sock_per_pcs
-            total_harga_klem = np.ceil(np.ceil(pred / totLamps) - 1) * harga_klem_per_pcs
-            total_harga_teedos = 1 * harga_teedos_per_pcs
-            total_harga_flexible = 1 * harga_flexible_per_m
-            total_harga_sekrup = (np.ceil(np.ceil(pred / totLamps) - 1) + 1) * harga_sekrup_fisher_per_pcs
+            total_harga_pipa = np.ceil (pred- 1) * harga_pipa_per_m
+            total_harga_sock = np.ceil((pred - 1) / 2) * harga_sock_per_pcs
+            total_harga_klem = np.ceil(pred - 1) * harga_klem_per_pcs
+            total_harga_teedos = totLamps * harga_teedos_per_pcs
+            total_harga_flexible = totLamps * harga_flexible_per_m
+            total_harga_sekrup = (np.ceil(pred - 1) + totLamps) * harga_sekrup_fisher_per_pcs
 
             total_harga = (
                 total_harga_nym +

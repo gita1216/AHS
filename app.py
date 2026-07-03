@@ -65,13 +65,13 @@ with st.container():
             pred = model.predict(input_data)[0]
 
             # Hitung jumlah titik kabel
-            cable_point = np.ceil(pred / totLamps)
+            cable_point = int(np.ceil(pred / totLamps))
 
             # Hitung komponen harga berdasarkan jumlah titik lampu
             total_harga_nym = cable_point * harga_nym_per_m * totLamps
             pipa_conduit = cable_point - 1
             total_harga_pipa = pipa_conduit * totLamps * harga_pipa_per_m
-            sock_pcs = np.ceil(pipa_conduit / 2)
+            sock_pcs = int(np.ceil(pipa_conduit / 2))
             total_harga_sock = sock_pcs * totLamps * harga_sock_per_pcs
             klem_pcs = np.ceil(pipa_conduit)
             total_harga_klem = klem_pcs * totLamps * harga_klem_per_pcs
